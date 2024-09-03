@@ -9,18 +9,22 @@ function saludo() {
     alert("Bienvenido/a a la tienda bostera: " + nombre);
 }
 saludo();
+
 let talles = ["S", "M", "L", "XL"];
+
 class ArticulosDeCompra {
     constructor(indumentaria, categoria, talles, precio) {
         this.indumentaria = indumentaria;
         this.categoria = categoria;
         this.talles = talles;
         this.precio = precio;
-    }    
+    }
+    
     mostrarTalles() {
         return this.talles.join(", ");
     }
 }
+
 const articulosDisponibles = {
     remeras: [
         new ArticulosDeCompra("Remera", "Titular", talles, 50000),
@@ -35,6 +39,7 @@ const articulosDisponibles = {
         new ArticulosDeCompra("Shorts", "ShortSuplente", talles, 10000)
     ]
 };
+
 class Compra {
     constructor(medioPago, nombre, apellido, dni, email) {
         this.medioPago = medioPago;
@@ -44,6 +49,7 @@ class Compra {
         this.email = email;
     }
 }
+
 function mostrarTallesParaArticulo(articulo) {
     let talleSeleccionado = prompt("Elige el talle:\n" + articulo.mostrarTalles());
     if (articulo.talles.includes(talleSeleccionado)) {
@@ -55,6 +61,7 @@ function mostrarTallesParaArticulo(articulo) {
         mostrarTallesParaArticulo(articulo);
     }
 }
+
 function solicitarDato(mensaje) {
     let dato;
     do {
@@ -65,20 +72,27 @@ function solicitarDato(mensaje) {
     } while (!dato);
     return dato;
 }
+
 function confirmarCompra() {
     const iva = 0.21;
     let total = carrito.reduce((sum, articulo) => sum + articulo.precio, 0);
-    let totalConIva = total * (1 + iva);    
-    alert(`El total con IVA es: $${totalConIva.toFixed(2)}\n\nDetalles de la compra:`);    
+    let totalConIva = total * (1 + iva);
+    
+    alert(`El total con IVA es: $${totalConIva.toFixed(2)}\n\nDetalles de la compra:`);
+    
     let mediosPago = ['Transferencia', 'Tarjeta de débito/crédito'];
-    let medioPago = solicitarDato(`Selecciona el medio de pago:\n1. ${mediosPago[0]}\n2. ${mediosPago[1]}`);   
+    let medioPago = solicitarDato(`Selecciona el medio de pago:\n1. ${mediosPago[0]}\n2. ${mediosPago[1]}`);
+    
     while (!['1', '2'].includes(medioPago)) {
         alert("Opción de medio de pago inválida. Por favor, selecciona 1 o 2.");
         medioPago = solicitarDato(`Selecciona el medio de pago:\n1. ${mediosPago[0]}\n2. ${mediosPago[1]}`);
-    }    
-    let compra = new Compra(medioPago, solicitarDato("Ingrese su nombre:"), solicitarDato("Ingrese su apellido:"), solicitarDato("Ingrese su DNI:"), solicitarDato("Ingrese su email:"));    
+    }
+    
+    let compra = new Compra(medioPago, solicitarDato("Ingrese su nombre:"), solicitarDato("Ingrese su apellido:"), solicitarDato("Ingrese su DNI:"), solicitarDato("Ingrese su email:"));
+    
     const ahora = new Date();
-    const fechaHora = ahora.toLocaleString();    
+    const fechaHora = ahora.toLocaleString();
+    
     alert(`Detalles de la compra:
 Nombre: ${compra.nombre}
 Apellido: ${compra.apellido}
@@ -89,6 +103,7 @@ Fecha y Hora: ${fechaHora}`);
     
     alert("Gracias, nos comunicaremos con usted vía email para terminar la operación.");
 }
+
 function agregarOtroArticulo() {
     let agregarOtro = confirm("¿Deseas agregar otro artículo a la compra?");
     if (agregarOtro) {
@@ -97,6 +112,7 @@ function agregarOtroArticulo() {
         confirmarCompra();
     }
 }
+
 function seleccionarArticulo(categoria, opciones) {
     let seleccion = prompt(`Selecciona una categoría para ${categoria}:\n${opciones.map((op, index) => `${index + 1}. ${op}`).join('\n')}`);
     let index = parseInt(seleccion) - 1;
@@ -109,6 +125,7 @@ function seleccionarArticulo(categoria, opciones) {
         iniciarCompra();
     }
 }
+
 function iniciarCompra() { 
     alert("Si desea comprar indumentaria relacionada al Club Atlético Boca Juniors, aprete aceptar y verá todos los productos que tenemos para ofrecerle.");
 
@@ -130,5 +147,6 @@ function iniciarCompra() {
             break;
     }
 }
+
 let carrito = [];
 iniciarCompra();

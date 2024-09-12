@@ -1,0 +1,111 @@
+body {
+    
+    background: linear-gradient(to bottom, 
+                                #0033A0, 
+                                #FFCC00, 
+                                #0033A0); 
+    font-family: Arial, sans-serif; 
+    margin: 0;
+    padding: 0;
+    color: #333; 
+}
+
+
+h1, h2, h3, p {
+    color: #FFD700; 
+}
+
+
+.hidden {
+    display: none;
+}
+
+#productos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.card {
+    width: 100%;
+    max-width: 300px; 
+    margin: 0 auto; 
+}
+
+.btn-agregar {
+    border: 2px solid transparent; 
+}
+
+.btn-agregar-active {
+    border: 2px solid black; 
+}
+
+#formSaludo {
+    text-align: center;
+}
+
+#formularioCompra {
+    width: 80%;
+    max-width: 500px;
+    margin: 0 auto; 
+}
+
+#mensajeBienvenida {
+    margin-bottom: 1rem; 
+}
+
+#mensajeConfirmarArticulo {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+#tallesContainer {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.card-img-top {
+    max-width: 100%;
+    height: auto;
+}
+
+.btn-eliminar {
+    margin-left: 1rem; 
+}
+
+#mensajeFinal {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+#listaCompra {
+    list-style: none; 
+    padding: 0;
+    margin: 0;
+}
+
+
+input.valid {
+    border-color: #28a745; 
+    background-image: url('https://image.shutterstock.com/image-vector/green-check-mark-tick-icon-600w-721338575.jpg'); /* Icono de verificación */
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 20px 20px; 
+}
+
+input.invalid {
+    border-color: #dc3545; 
+}
+
+input:valid {
+    border-color: #28a745;
+}
+
+input:invalid {
+    border-color: #dc3545;
+}
+
+.card-text {
+    color: black; 
+}

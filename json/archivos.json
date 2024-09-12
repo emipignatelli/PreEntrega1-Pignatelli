@@ -1,0 +1,40 @@
+{
+    "articulos": [
+        {
+            "indumentaria": "Remera",
+            "categoria": "Titular",
+            "talles": ["S", "M", "L", "XL"],
+            "precio": 50000
+        },
+        {
+            "indumentaria": "Remera",
+            "categoria": "Suplente",
+            "talles": ["S", "M", "L", "XL"],
+            "precio": 35000
+        },
+        {
+            "indumentaria": "Campera",
+            "categoria": "CamperaRompeViento",
+            "talles": ["S", "M", "L", "XL"],
+            "precio": 80000
+        },
+        {
+            "indumentaria": "Campera",
+            "categoria": "Camperon",
+            "talles": ["S", "M", "L", "XL"],
+            "precio": 120000
+        },
+        {
+            "indumentaria": "Shorts",
+            "categoria": "ShortTitular",
+            "talles": ["S", "M", "L", "XL"],
+            "precio": 15000
+        },
+        {
+            "indumentaria": "Shorts",
+            "categoria": "ShortSuplente",
+            "talles": ["S", "M", "L", "XL"],
+            "precio": 10000
+        }
+    ]
+}

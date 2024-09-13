@@ -1,18 +1,18 @@
 document.getElementById('btnSaludo').addEventListener('click', function() {
-    const nombre = document.getElementById('nombre').value;
+    const nombre = document.getElementById('nombre').value.trim();
     if (nombre) {
         localStorage.setItem('nombreUsuario', nombre); 
         document.getElementById('mensajeBienvenida').textContent = `Bienvenido/a a la tienda bostera: ${nombre}`;
-        
+
         document.getElementById('formSaludo').classList.add('hidden');
         document.getElementById('contenidoCompra').classList.remove('hidden');
         mostrarProductos();
     } else {
-        alert("El nombre no puede estar vacío.");
+        mostrarMensaje("El nombre no puede estar vacío.");
     }
 });
 
-let talles = ["S", "M", "L", "XL"];
+const talles = ["S", "M", "L", "XL"];
 const IVA_RATE = 0.21; 
 
 class ArticulosDeCompra {
@@ -58,13 +58,11 @@ class Compra {
 }
 
 let carrito = [];
-let articuloActual = null; 
-
+let articuloActual = null;
 
 function guardarCarrito() {
     localStorage.setItem('carrito', JSON.stringify(carrito));
 }
-
 
 function cargarCarrito() {
     const carritoGuardado = localStorage.getItem('carrito');
@@ -73,7 +71,6 @@ function cargarCarrito() {
         mostrarListaCompra();
     }
 }
-
 
 function cargarNombreUsuario() {
     const nombre = localStorage.getItem('nombreUsuario');
@@ -85,41 +82,26 @@ function cargarNombreUsuario() {
     }
 }
 
-
 cargarNombreUsuario();
 cargarCarrito();
 
 function mostrarProductos() {
     const categorias = Object.keys(articulosDisponibles);
     const productosDiv = document.getElementById('productos');
-    productosDiv.innerHTML = ''; 
+    productosDiv.innerHTML = '';
 
     let count = 0;
     categorias.forEach(categoria => {
         articulosDisponibles[categoria].forEach((articulo, index) => {
             if (count < 6) {
-                
-                let imagen = '';
-                switch (count) {
-                    case 0:
-                        imagen = './multimedia/remeraTitular.png'; 
-                        break;
-                    case 1:
-                        imagen = './multimedia/remeraSuplente.png'; 
-                        break;
-                    case 2:
-                        imagen = './multimedia/camperaRompeVientos.png'; 
-                        break;
-                    case 3:
-                        imagen = './multimedia/camperon.webp'; 
-                        break;
-                    case 4:
-                        imagen = './multimedia/shortsTitular.png'; 
-                        break;
-                    case 5:
-                        imagen = './multimedia/shortsSuplente.png'; 
-                        break;
-                }
+                const imagen = [
+                    './multimedia/remeraTitular.png', 
+                    './multimedia/remeraSuplente.png', 
+                    './multimedia/camperaRompeVientos.png', 
+                    './multimedia/camperon.webp', 
+                    './multimedia/shortsTitular.png', 
+                    './multimedia/shortsSuplente.png'
+                ][count];
                 
                 const cardHTML = `
                     <div class="card">
@@ -139,8 +121,7 @@ function mostrarProductos() {
 }
 
 function agregarAlCarrito(categoria, index) {
-    articuloActual = articulosDisponibles[categoria][index]; 
-    
+    articuloActual = articulosDisponibles[categoria][index];
     
     document.querySelectorAll('.btn-agregar').forEach(btn => btn.classList.remove('btn-agregar-active'));
     document.querySelector(`button[onclick="agregarAlCarrito('${categoria}', ${index})"]`).classList.add('btn-agregar-active');
@@ -156,17 +137,17 @@ function agregarAlCarrito(categoria, index) {
 function confirmarTalle(talle) {
     if (articuloActual) {
         carrito.push(new ArticulosDeCompra(articuloActual.indumentaria, articuloActual.categoria, [talle], articuloActual.precio));
-        articuloActual = null; 
+        articuloActual = null;
         document.getElementById('tallesContainer').classList.add('hidden');
         mostrarListaCompra();
         mostrarMensajeConfirmarArticulo();
-        guardarCarrito(); 
+        guardarCarrito();
     }
 }
 
 function mostrarListaCompra() {
     const listaCompra = document.getElementById('listaCompra');
-    listaCompra.innerHTML = ''; 
+    listaCompra.innerHTML = '';
     
     carrito.forEach((articulo, index) => {
         const precioConIVA = articulo.calcularPrecioConIVA().toFixed(2);
@@ -177,7 +158,6 @@ function mostrarListaCompra() {
             </li>
         `;
     });
-    
     
     const totalSinIVA = carrito.reduce((sum, articulo) => sum + articulo.precio, 0);
     const totalConIVA = carrito.reduce((sum, articulo) => sum + articulo.calcularPrecioConIVA(), 0);
@@ -192,7 +172,16 @@ function mostrarMensajeConfirmarArticulo() {
 function eliminarArticulo(index) {
     carrito.splice(index, 1);
     mostrarListaCompra();
-    guardarCarrito(); 
+    guardarCarrito();
+}
+
+function mostrarMensaje(mensaje) {
+    const mensajeElemento = document.getElementById('mensajeCompra');
+    mensajeElemento.textContent = mensaje;
+    mensajeElemento.classList.remove('hidden');
+    setTimeout(() => {
+        mensajeElemento.classList.add('hidden');
+    }, 3000); 
 }
 
 document.getElementById('btnAgregarOtro').addEventListener('click', function() {
@@ -219,40 +208,53 @@ function seleccionarMedioPago(medio) {
 }
 
 document.getElementById('btnConfirmarCompra').addEventListener('click', function() {
-    const nombreCompleto = document.getElementById('nombreCompleto').value;
-    const apellido = document.getElementById('apellido').value;
-    const dni = document.getElementById('dni').value;
-    const email = document.getElementById('email').value;
+    const nombreCompleto = document.getElementById('nombreCompleto').value.trim();
+    const apellido = document.getElementById('apellido').value.trim();
+    const dni = document.getElementById('dni').value.trim();
+    const email = document.getElementById('email').value.trim();
     const medioPago = document.getElementById('compraForm').dataset.medioPago;
 
-    
+
     if (!nombreCompleto || !apellido || !dni || !email || !medioPago) {
-        alert("Todos los campos son obligatorios.");
+        mostrarMensaje("Por favor, completa todos los campos del formulario.");
         return;
     }
+
     
-    
-    if (!/^\d+$/.test(dni)) {
-        alert("El DNI debe ser un número.");
+    const dniValido = /^\d+$/.test(dni); 
+    if (!dniValido) {
+        mostrarMensaje("El DNI debe ser un número válido.");
         return;
     }
+
     
-    
-    if (!/@/.test(email)) {
-        alert("El email debe ser válido.");
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); 
+    if (!emailValido) {
+        mostrarMensaje("El email debe tener un formato válido (por ejemplo, usuario@dominio.com).");
         return;
     }
-    
-    
+
     const compra = new Compra(medioPago, nombreCompleto, apellido, dni, email);
-    console.log('Compra confirmada:', compra);
+
     
+    const mensajeFinal = document.getElementById('mensajeFinal');
+    mensajeFinal.textContent = "Gracias, nos comunicaremos vía email para finalizar su operación.";
+    mensajeFinal.classList.remove('hidden');
+
     
-    document.getElementById('mensajeFinal').textContent = "Gracias, nos comunicaremos con usted vía email para terminar la operación.";
-    document.getElementById('mensajeFinal').classList.remove('hidden');
-    
-    
+    document.getElementById('formularioCompra').classList.add('hidden');
+    document.getElementById('contenidoCompra').classList.add('hidden');
+    document.getElementById('resumenCompra').classList.add('hidden');
     carrito = [];
-    localStorage.removeItem('carrito');
-    localStorage.removeItem('nombreUsuario');
+    guardarCarrito();
+
+    
+    setTimeout(function() {
+        
+        localStorage.removeItem('nombreUsuario');
+        localStorage.removeItem('carrito');
+        
+        document.getElementById('formSaludo').classList.remove('hidden');
+        document.getElementById('mensajeBienvenida').textContent = '';
+    }, 5000); 
 });

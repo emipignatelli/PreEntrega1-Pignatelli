@@ -1,30 +1,37 @@
+
+function mostrarFechaActual() {
+    const fecha = new Date();
+    const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
+    const fechaFormateada = fecha.toLocaleDateString('es-AR', opciones);
+    document.getElementById('fechaActual').textContent = fechaFormateada;
+}
+
 document.getElementById('btnSaludo').addEventListener('click', function() {
     const nombre = document.getElementById('nombre').value.trim();
+    const mensajeBienvenida = nombre ? `Bienvenido/a a la tienda bostera: ${nombre}` : "Por favor, ingresa tu nombre.";
+    
     if (nombre) {
-        localStorage.setItem('nombreUsuario', nombre); 
-        document.getElementById('mensajeBienvenida').textContent = `Bienvenido/a a la tienda bostera: ${nombre}`;
+        localStorage.setItem('nombreUsuario', nombre);
+        document.getElementById('mensajeBienvenida').textContent = mensajeBienvenida;
 
         document.getElementById('formSaludo').classList.add('hidden');
         document.getElementById('contenidoCompra').classList.remove('hidden');
-        mostrarProductos();
+        cargarArticulos();
     } else {
-        mostrarMensaje("El nombre no puede estar vacío.");
+        mostrarMensaje(mensajeBienvenida);
     }
 });
 
-const talles = ["S", "M", "L", "XL"];
-const IVA_RATE = 0.21; 
+const IVA_RATE = 0.21;
 
 class ArticulosDeCompra {
-    constructor(indumentaria, categoria, talles, precio) {
+    constructor(indumentaria, categoria, talles, precio, talleSeleccionado) {
         this.indumentaria = indumentaria;
         this.categoria = categoria;
         this.talles = talles;
         this.precio = precio;
-    }
-
-    mostrarTalles() {
-        return this.talles.join(", ");
+        this.cantidad = 0;
+        this.talleSeleccionado = talleSeleccionado;
     }
 
     calcularPrecioConIVA() {
@@ -32,33 +39,8 @@ class ArticulosDeCompra {
     }
 }
 
-const articulosDisponibles = {
-    remeras: [
-        new ArticulosDeCompra("Remera", "Titular", talles, 50000),
-        new ArticulosDeCompra("Remera", "Suplente", talles, 35000)
-    ],
-    camperas: [
-        new ArticulosDeCompra("Campera", "CamperaRompeViento", talles, 80000),
-        new ArticulosDeCompra("Campera", "Camperon", talles, 120000)
-    ],
-    shorts: [
-        new ArticulosDeCompra("Shorts", "ShortTitular", talles, 15000),
-        new ArticulosDeCompra("Shorts", "ShortSuplente", talles, 10000)
-    ]
-};
-
-class Compra {
-    constructor(medioPago, nombre, apellido, dni, email) {
-        this.medioPago = medioPago;
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.dni = dni;
-        this.email = email;
-    }
-}
-
 let carrito = [];
-let articuloActual = null;
+let articulosDisponibles = [];
 
 function guardarCarrito() {
     localStorage.setItem('carrito', JSON.stringify(carrito));
@@ -67,7 +49,7 @@ function guardarCarrito() {
 function cargarCarrito() {
     const carritoGuardado = localStorage.getItem('carrito');
     if (carritoGuardado) {
-        carrito = JSON.parse(carritoGuardado).map(articulo => new ArticulosDeCompra(articulo.indumentaria, articulo.categoria, articulo.talles, articulo.precio));
+        carrito = JSON.parse(carritoGuardado).map(articulo => new ArticulosDeCompra(articulo.indumentaria, articulo.categoria, articulo.talles, articulo.precio, articulo.talleSeleccionado));
         mostrarListaCompra();
     }
 }
@@ -78,71 +60,68 @@ function cargarNombreUsuario() {
         document.getElementById('mensajeBienvenida').textContent = `Bienvenido/a a la tienda bostera: ${nombre}`;
         document.getElementById('formSaludo').classList.add('hidden');
         document.getElementById('contenidoCompra').classList.remove('hidden');
-        mostrarProductos();
+        cargarArticulos();
     }
 }
 
-cargarNombreUsuario();
-cargarCarrito();
+async function cargarArticulos() {
+    try {
+        const response = await fetch('json/archivos.json');
+        const { articulos } = await response.json();
+        articulosDisponibles = articulos;
+        mostrarProductos(articulosDisponibles);
+    } catch (error) {
+        console.error('Error al cargar los artículos:', error);
+    }
+}
 
-function mostrarProductos() {
-    const categorias = Object.keys(articulosDisponibles);
+function mostrarProductos(articulos) {
     const productosDiv = document.getElementById('productos');
     productosDiv.innerHTML = '';
 
-    let count = 0;
-    categorias.forEach(categoria => {
-        articulosDisponibles[categoria].forEach((articulo, index) => {
-            if (count < 6) {
-                const imagen = [
-                    './multimedia/remeraTitular.png', 
-                    './multimedia/remeraSuplente.png', 
-                    './multimedia/camperaRompeVientos.png', 
-                    './multimedia/camperon.webp', 
-                    './multimedia/shortsTitular.png', 
-                    './multimedia/shortsSuplente.png'
-                ][count];
-                
-                const cardHTML = `
-                    <div class="card">
-                        <img src="${imagen}" class="card-img-top" alt="${articulo.indumentaria}">
-                        <div class="card-body">
-                            <h5 class="card-title">${articulo.indumentaria} ${articulo.categoria}</h5>
-                            <p class="card-text">Precio: $${articulo.precio} S/IVA</p>
-                            <button class="btn btn-primary btn-agregar" onclick="agregarAlCarrito('${categoria}', ${index})">Agregar al carrito</button>
-                        </div>
-                    </div>
-                `;
-                productosDiv.innerHTML += cardHTML;
-                count++;
-            }
-        });
+    articulos.forEach((articulo, index) => {
+        const tallesOptions = articulo.talles.map(talle => `<option value="${talle}">${talle}</option>`).join('');
+
+        const cardHTML = `
+            <div class="card">
+                <img src="./multimedia/${articulo.imagen}" class="card-img-top" alt="${articulo.indumentaria}">
+                <div class="card-body">
+                    <h5 class="card-title">${articulo.indumentaria} ${articulo.categoria}</h5>
+                    <p class="card-text">Precio: $${articulo.precio} S/IVA</p>
+                    <select class="form-select" id="talleSelect${index}">
+                        <option value="" disabled selected>Seleccionar talle</option>
+                        ${tallesOptions}
+                    </select>
+                    <button class="btn btn-primary btn-agregar" onclick="agregarAlCarrito(${index})">Agregar al carrito</button>
+                </div>
+            </div>
+        `;
+        productosDiv.innerHTML += cardHTML;
     });
 }
 
-function agregarAlCarrito(categoria, index) {
-    articuloActual = articulosDisponibles[categoria][index];
-    
-    document.querySelectorAll('.btn-agregar').forEach(btn => btn.classList.remove('btn-agregar-active'));
-    document.querySelector(`button[onclick="agregarAlCarrito('${categoria}', ${index})"]`).classList.add('btn-agregar-active');
-    
-    let tallesContainer = document.getElementById('tallesContainer');
-    tallesContainer.innerHTML = `
-        <h3>Selecciona el talle:</h3>
-        ${articuloActual.talles.map(talle => `<button type="button" class="btn btn-warning" onclick="confirmarTalle('${talle}')">${talle}</button>`).join(' ')}
-    `;
-    tallesContainer.classList.remove('hidden');
-}
+function agregarAlCarrito(index) {
+    const articuloActual = articulosDisponibles[index];
+    const talleSeleccionado = document.getElementById(`talleSelect${index}`).value;
 
-function confirmarTalle(talle) {
-    if (articuloActual) {
-        carrito.push(new ArticulosDeCompra(articuloActual.indumentaria, articuloActual.categoria, [talle], articuloActual.precio));
-        articuloActual = null;
-        document.getElementById('tallesContainer').classList.add('hidden');
-        mostrarListaCompra();
-        mostrarMensajeConfirmarArticulo();
-        guardarCarrito();
+    if (!talleSeleccionado) {
+        mostrarMensaje("Por favor, selecciona un talle.");
+        return;
     }
+
+    const articuloEnCarrito = carrito.find(art => art.indumentaria === articuloActual.indumentaria && art.talleSeleccionado === talleSeleccionado);
+
+    if (articuloEnCarrito) {
+        articuloEnCarrito.cantidad += 1;
+    } else {
+        const nuevoArticulo = new ArticulosDeCompra(articuloActual.indumentaria, articuloActual.categoria, articuloActual.talles, articuloActual.precio, talleSeleccionado);
+        nuevoArticulo.cantidad = 1;
+        carrito.push(nuevoArticulo);
+    }
+
+    mostrarListaCompra();
+    mostrarMensajeConfirmarArticulo();
+    guardarCarrito();
 }
 
 function mostrarListaCompra() {
@@ -153,15 +132,15 @@ function mostrarListaCompra() {
         const precioConIVA = articulo.calcularPrecioConIVA().toFixed(2);
         listaCompra.innerHTML += `
             <li class="text-center">
-                ${articulo.indumentaria} ${articulo.categoria} - ${articulo.talles.join(", ")} - $${articulo.precio} S/IVA - $${precioConIVA} con IVA
+                ${articulo.indumentaria} ${articulo.categoria} (Talle: ${articulo.talleSeleccionado}) - Cantidad: ${articulo.cantidad} - Precio: $${articulo.precio} S/IVA - Total: $${(articulo.precio * articulo.cantidad).toFixed(2)} S/IVA - Precio con IVA: $${precioConIVA}
                 <button class="btn btn-danger btn-sm" onclick="eliminarArticulo(${index})">Eliminar</button>
             </li>
         `;
     });
-    
-    const totalSinIVA = carrito.reduce((sum, articulo) => sum + articulo.precio, 0);
-    const totalConIVA = carrito.reduce((sum, articulo) => sum + articulo.calcularPrecioConIVA(), 0);
-    document.getElementById('mensajeTotal').textContent = `Total: $${totalSinIVA.toFixed(2)} S/IVA - $${totalConIVA.toFixed(2)} con IVA`;
+
+    const totalSinIVA = carrito.reduce((sum, articulo) => sum + (articulo.precio * articulo.cantidad), 0);
+    const totalConIVA = carrito.reduce((sum, articulo) => sum + (articulo.calcularPrecioConIVA() * articulo.cantidad), 0);
+    document.getElementById('mensajeTotal').textContent = `Total: $${totalSinIVA.toFixed(2)} S/IVA - Total con IVA: $${totalConIVA.toFixed(2)}`;
     document.getElementById('resumenCompra').classList.remove('hidden');
 }
 
@@ -214,47 +193,66 @@ document.getElementById('btnConfirmarCompra').addEventListener('click', function
     const email = document.getElementById('email').value.trim();
     const medioPago = document.getElementById('compraForm').dataset.medioPago;
 
-
-    if (!nombreCompleto || !apellido || !dni || !email || !medioPago) {
-        mostrarMensaje("Por favor, completa todos los campos del formulario.");
-        return;
-    }
+    
+    document.getElementById('nombreError').textContent = '';
+    document.getElementById('apellidoError').textContent = '';
+    document.getElementById('dniError').textContent = '';
+    document.getElementById('emailError').textContent = '';
 
     
-    const dniValido = /^\d+$/.test(dni); 
-    if (!dniValido) {
-        mostrarMensaje("El DNI debe ser un número válido.");
-        return;
-    }
+    document.getElementById('nombreError').classList.add('hidden');
+    document.getElementById('apellidoError').classList.add('hidden');
+    document.getElementById('dniError').classList.add('hidden');
+    document.getElementById('emailError').classList.add('hidden');
+
+    let validacion = true;
 
     
-    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); 
-    if (!emailValido) {
-        mostrarMensaje("El email debe tener un formato válido (por ejemplo, usuario@dominio.com).");
-        return;
-    }
+    validacion = nombreCompleto ? validacion : (document.getElementById('nombreError').textContent = "Por favor, ingresa tu nombre completo.", document.getElementById('nombreError').classList.remove('hidden'), false);
+    validacion = apellido ? validacion : (document.getElementById('apellidoError').textContent = "Por favor, ingresa tu apellido.", document.getElementById('apellidoError').classList.remove('hidden'), false);
+    validacion = /^\d+$/.test(dni) ? validacion : (document.getElementById('dniError').textContent = "El DNI debe ser un número válido.", document.getElementById('dniError').classList.remove('hidden'), false);
+    validacion = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? validacion : (document.getElementById('emailError').textContent = "El email debe tener un formato válido (por ejemplo, usuario@dominio.com).", document.getElementById('emailError').classList.remove('hidden'), false);
 
-    const compra = new Compra(medioPago, nombreCompleto, apellido, dni, email);
-
-    
-    const mensajeFinal = document.getElementById('mensajeFinal');
-    mensajeFinal.textContent = "Gracias, nos comunicaremos vía email para finalizar su operación.";
-    mensajeFinal.classList.remove('hidden');
-
-    
-    document.getElementById('formularioCompra').classList.add('hidden');
-    document.getElementById('contenidoCompra').classList.add('hidden');
-    document.getElementById('resumenCompra').classList.add('hidden');
-    carrito = [];
-    guardarCarrito();
-
-    
-    setTimeout(function() {
+    if (validacion) {
         
-        localStorage.removeItem('nombreUsuario');
-        localStorage.removeItem('carrito');
-        
-        document.getElementById('formSaludo').classList.remove('hidden');
-        document.getElementById('mensajeBienvenida').textContent = '';
-    }, 5000); 
+        emailjs.send("service_g0ep3ia", "template_z0l8k3g", {
+            nombre: nombreCompleto,
+            apellido: apellido,
+            dni: dni,
+            email: email
+        })
+        .then(() => {
+            Swal.fire({
+                title: 'Gracias por la compra!',
+                text: 'Nos comunicaremos con usted vía email para finalizar la solicitud.',
+                icon: 'success',
+                timer: 5000,
+                showConfirmButton: false
+            }).then(() => {
+                carrito = [];
+                guardarCarrito();
+                localStorage.removeItem('nombreUsuario');
+                localStorage.removeItem('carrito');
+
+                document.getElementById('formSaludo').classList.remove('hidden');
+                document.getElementById('mensajeBienvenida').textContent = '';
+                document.getElementById('formularioCompra').classList.add('hidden');
+                document.getElementById('contenidoCompra').classList.add('hidden');
+                document.getElementById('resumenCompra').classList.add('hidden');
+            });
+        })
+        .catch(error => {
+            console.error('Error al enviar el correo:', error);
+        });
+    }
+});
+
+cargarNombreUsuario();
+cargarCarrito();
+mostrarFechaActual();
+
+window.addEventListener('load', () => {
+    if (carrito.length > 0) {
+        mostrarMensajeConfirmarArticulo();
+    }
 });

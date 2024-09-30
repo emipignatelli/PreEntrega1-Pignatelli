@@ -4,37 +4,43 @@
             "indumentaria": "Remera",
             "categoria": "Titular",
             "talles": ["S", "M", "L", "XL"],
-            "precio": 50000
+            "precio": 50000,
+            "imagen": "remeraTitular.png"
         },
         {
             "indumentaria": "Remera",
             "categoria": "Suplente",
             "talles": ["S", "M", "L", "XL"],
-            "precio": 35000
+            "precio": 35000,
+            "imagen": "remeraSuplente.png"
         },
         {
             "indumentaria": "Campera",
-            "categoria": "CamperaRompeViento",
+            "categoria": "Rompe Vientos",
             "talles": ["S", "M", "L", "XL"],
-            "precio": 80000
+            "precio": 80000,
+            "imagen": "camperaRompeVientos.png"
         },
         {
             "indumentaria": "Campera",
-            "categoria": "Camperon",
+            "categoria": "Camperón",
             "talles": ["S", "M", "L", "XL"],
-            "precio": 120000
+            "precio": 120000,
+            "imagen": "camperon.webp"
         },
         {
             "indumentaria": "Shorts",
-            "categoria": "ShortTitular",
+            "categoria": "Titular",
             "talles": ["S", "M", "L", "XL"],
-            "precio": 15000
+            "precio": 15000,
+            "imagen": "shortsTitular.png"
         },
         {
             "indumentaria": "Shorts",
-            "categoria": "ShortSuplente",
+            "categoria": "Suplente",
             "talles": ["S", "M", "L", "XL"],
-            "precio": 10000
+            "precio": 10000,
+            "imagen": "shortsSuplente.png"
         }
     ]
 }
